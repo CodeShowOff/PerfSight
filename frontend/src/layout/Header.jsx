@@ -2,12 +2,14 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLogoutMutation } from '../slices/usersApiSlice';
 import { logout } from '../slices/authSlice';
+import { useTheme } from '../context/ThemeContext';
 
 const Header = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [logoutApiCall] = useLogoutMutation();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
     try {
@@ -24,52 +26,67 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm h-16 flex items-center justify-between px-8">
+    <header className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 shadow-sm h-16 flex items-center justify-between px-6 lg:px-12 transition-colors duration-300 z-10">
+      {/* Subtle top border block on header instead of floating */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-stone-900 dark:bg-stone-300 transition-colors duration-300"></div>
+
       {/* Logo and Brand */}
-      <button onClick={() => navigate('/')} className="flex items-center gap-3 group cursor-pointer">
-        <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        </div>
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
-          PerfSight
+      <button onClick={() => navigate('/')} className="flex items-center gap-3 group cursor-pointer mt-1">
+        <h1 className="text-2xl font-serif font-bold text-stone-900 dark:text-stone-100 transition-colors duration-300">
+          PerfSight.
         </h1>
       </button>
 
-      {/* User Menu */}
-      <div className="flex items-center gap-4">
+      {/* User Menu & Toggles */}
+      <div className="flex items-center gap-6 mt-1">
+        <button
+          onClick={toggleTheme}
+          className="p-2 text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors duration-300"
+          aria-label="Toggle Theme"
+        >
+          {theme === 'dark' ? (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {/* Sun */}
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {/* Moon */}
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          )}
+        </button>
+
         {userInfo && (
-          <>
+          <div className="flex items-center gap-4">
             {/* User Info */}
             <button
               onClick={handleProfileClick}
-              className="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors group"
+              className="flex items-center gap-3 py-1 hover:opacity-80 transition-opacity"
             >
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center text-white font-semibold text-sm">
-                  {userInfo.name?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
-                    {userInfo.name}
-                  </p>
-                  <p className="text-xs text-gray-500">View Profile</p>
-                </div>
+              <div className="w-8 h-8 bg-stone-900 dark:bg-stone-100 rounded-full flex items-center justify-center text-stone-50 dark:text-stone-900 font-serif font-bold text-sm transition-colors duration-300">
+                {userInfo.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div className="text-left hidden md:block">
+                <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 transition-colors duration-300 leading-none mb-1">
+                  {userInfo.name}
+                </p>
+                <p className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wider leading-none">
+                  Profile
+                </p>
               </div>
             </button>
+
+            <div className="w-px h-8 bg-stone-200 dark:bg-stone-800 mx-2 transition-colors duration-300"></div>
 
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200 hover:shadow-md"
+              className="px-4 py-2 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 text-sm font-medium hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 transition-colors duration-300 shadow-sm"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
               Logout
             </button>
-          </>
+          </div>
         )}
       </div>
     </header>

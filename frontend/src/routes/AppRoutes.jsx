@@ -19,7 +19,7 @@ const RouteScrollManager = () => {
 
 const AppRoutes = () => {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <RouteScrollManager />
       <Routes>
         {/* Public Routes */}
