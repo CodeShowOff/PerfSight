@@ -1,5 +1,5 @@
 const RangeSelector = ({ range, onRangeChange }) => {
-  const ranges = ['1h', '6h', '24h'];
+  const ranges = ['1h', '6h', '24h', '7d', '30d'];
 
   return (
     <div className="flex gap-2">

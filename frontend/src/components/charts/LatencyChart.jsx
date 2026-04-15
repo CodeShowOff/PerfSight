@@ -18,10 +18,27 @@ const LatencyChart = ({ service }) => {
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
+
+    if (range === '30d') {
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+      });
+    }
+
+    if (range === '7d') {
+      return date.toLocaleString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        hour12: false,
+      });
+    }
+
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: false 
+      hour12: false,
     });
   };
 
@@ -79,7 +96,7 @@ const LatencyChart = ({ service }) => {
             <Line
               type="monotone"
               dataKey="avgLatency"
-              stroke="#3b82f6"
+              stroke="#374151"
               strokeWidth={2}
               dot={false}
               name="Avg Latency"
@@ -87,7 +104,7 @@ const LatencyChart = ({ service }) => {
             <Line
               type="monotone"
               dataKey="p95Latency"
-              stroke="#a855f7"
+              stroke="#6b7280"
               strokeWidth={2}
               dot={false}
               name="P95 Latency"

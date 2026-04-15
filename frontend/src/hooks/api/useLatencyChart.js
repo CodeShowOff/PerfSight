@@ -12,6 +12,7 @@ const useLatencyChart = (service, range) => {
   const fetchData = useCallback(async () => {
     if (!service || !range) {
       abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
       inFlightKeyRef.current = null;
       inFlightRequestRef.current = null;
       setData([]);
@@ -22,7 +23,16 @@ const useLatencyChart = (service, range) => {
 
     const requestKey = `${service}|${range}`;
     if (inFlightRequestRef.current && inFlightKeyRef.current === requestKey) {
-      return inFlightRequestRef.current;
+      const hasActiveController = Boolean(
+        abortControllerRef.current && !abortControllerRef.current.signal.aborted
+      );
+
+      if (hasActiveController) {
+        return inFlightRequestRef.current;
+      }
+
+      inFlightKeyRef.current = null;
+      inFlightRequestRef.current = null;
     }
 
     abortControllerRef.current?.abort();
@@ -61,6 +71,9 @@ const useLatencyChart = (service, range) => {
 
     return () => {
       abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
+      inFlightKeyRef.current = null;
+      inFlightRequestRef.current = null;
     };
   }, [fetchData]);
 

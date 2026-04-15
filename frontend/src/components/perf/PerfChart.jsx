@@ -121,7 +121,7 @@ const PerfChart = ({ service }) => {
             <Line
               type="monotone"
               dataKey="cpuCycles"
-              stroke="#f97316"
+              stroke="#111827"
               strokeWidth={2}
               dot={false}
               name="CPU Cycles"
@@ -129,7 +129,7 @@ const PerfChart = ({ service }) => {
             <Line
               type="monotone"
               dataKey="cacheMisses"
-              stroke="#ef4444"
+              stroke="#4b5563"
               strokeWidth={2}
               dot={false}
               name="Cache Misses"
@@ -137,7 +137,7 @@ const PerfChart = ({ service }) => {
             <Line
               type="monotone"
               dataKey="instructions"
-              stroke="#14b8a6"
+              stroke="#9ca3af"
               strokeWidth={2}
               dot={false}
               name="Instructions"

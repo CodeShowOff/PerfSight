@@ -39,8 +39,8 @@ const Baselines = () => {
               </svg>
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">Git-Tracked Baselines</h1>
-              <p className="text-gray-600 mt-1">Version-controlled performance benchmarks</p>
+              <h1 className="text-4xl font-bold text-gray-900">Baselines</h1>
+              <p className="text-gray-600 mt-1">Performance benchmarks stored in the database</p>
             </div>
           </div>
         </div>
@@ -60,8 +60,8 @@ const Baselines = () => {
               </svg>
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">Git-Tracked Baselines</h1>
-              <p className="text-gray-600 mt-1">Version-controlled performance benchmarks</p>
+              <h1 className="text-4xl font-bold text-gray-900">Baselines</h1>
+              <p className="text-gray-600 mt-1">Performance benchmarks stored in the database</p>
             </div>
           </div>
         </div>
@@ -81,8 +81,8 @@ const Baselines = () => {
             </svg>
           </div>
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">Git-Tracked Baselines</h1>
-            <p className="text-gray-600 mt-1">Version-controlled performance benchmarks</p>
+            <h1 className="text-4xl font-bold text-gray-900">Baselines</h1>
+            <p className="text-gray-600 mt-1">Performance benchmarks stored in the database</p>
           </div>
         </div>
       </div>
@@ -96,10 +96,10 @@ const Baselines = () => {
             </svg>
           </div>
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-gray-900 mb-1">About Git-Tracked Baselines</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-1">About Baselines</h3>
             <p className="text-sm text-gray-700">
-              Baselines are stored in your Git repository for version control. They provide reference 
-              points for comparing current performance metrics and detecting regressions over time.
+              Baselines are stored in the database and provide reference points for comparing current
+              performance metrics and detecting regressions over time.
             </p>
           </div>
         </div>

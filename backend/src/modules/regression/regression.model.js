@@ -1,7 +1,14 @@
 import mongoose from 'mongoose';
+import retention from '../../config/retention.config.js';
 
 const regressionSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
+      index: true,
+    },
     service: {
       type: String,
       required: true,
@@ -9,6 +16,11 @@ const regressionSchema = new mongoose.Schema(
     detectedAt: {
       type: Date,
       default: Date.now,
+    },
+    expiresAt: {
+      type: Date,
+      required: true,
+      select: false,
     },
     windowEnd: {
       type: Date,
@@ -52,7 +64,14 @@ const regressionSchema = new mongoose.Schema(
   }
 );
 
-regressionSchema.index({ service: 1, detectedAt: -1 });
+regressionSchema.index({ user: 1, service: 1, detectedAt: -1 });
+regressionSchema.index(
+  { expiresAt: 1 },
+  {
+    expireAfterSeconds: 0,
+    name: 'regression_expiresAt_ttl',
+  }
+);
 
 const Regression = mongoose.model('Regression', regressionSchema);
 

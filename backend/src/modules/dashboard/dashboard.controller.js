@@ -9,7 +9,7 @@ import * as dashboardService from './dashboard.service.js';
 const fetchServiceOverview = asyncHandler(async (req, res) => {
   const { service } = req.params;
 
-  const data = await dashboardService.getServiceOverview(service);
+  const data = await dashboardService.getServiceOverview(req.user._id, service);
 
   res.status(200).json({
     success: true,
@@ -23,7 +23,7 @@ const fetchServiceOverview = asyncHandler(async (req, res) => {
  * @access  Private
  */
 const fetchSystemHealth = asyncHandler(async (req, res) => {
-  const data = await dashboardService.getSystemHealth();
+  const data = await dashboardService.getSystemHealth(req.user._id);
 
   res.status(200).json({
     success: true,
@@ -40,13 +40,13 @@ const fetchLatencyChart = asyncHandler(async (req, res) => {
   const { service } = req.params;
   const range = req.query.range || '1h';
 
-  const validRanges = ['1h', '6h', '24h'];
+  const validRanges = ['1h', '6h', '24h', '7d', '30d'];
   if (!validRanges.includes(range)) {
     res.status(400);
-    throw new Error('Invalid range. Allowed values: 1h, 6h, 24h');
+    throw new Error('Invalid range. Allowed values: 1h, 6h, 24h, 7d, 30d');
   }
 
-  const data = await dashboardService.getLatencyChart(service, range);
+  const data = await dashboardService.getLatencyChart(req.user._id, service, range);
 
   res.status(200).json({
     success: true,

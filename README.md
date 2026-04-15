@@ -7,7 +7,7 @@
 ### Backend Features
 - **Real-time Metrics Ingestion** - Collect latency, throughput, and performance data
 - **Regression Detection** - Hybrid z-score + baseline comparison algorithms
-- **Git-Tracked Baselines** - Version-controlled performance baselines stored as JSON
+- **Git-Tracked Baselines** - Version-controlled per-user performance baselines stored as JSON
 - **Unix Perf Integration** - CPU cycles, cache misses, instruction counts
 - **Automated Analysis Worker** - Background processing every 60 seconds
 - **Comprehensive Reports** - Aggregated analysis with actionable insights
@@ -58,6 +58,9 @@ NODE_ENV=development
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/perfsight
 JWT_SECRET=your_jwt_secret_key_here
+
+# MongoDB TTL retention (days). Default: 30
+DATA_RETENTION_DAYS=30
 ```
 
 **For MongoDB Atlas:**
@@ -175,8 +178,8 @@ PerfSight/
 │   ├── vite.config.js
 │   └── package.json
 │
-├── baselines/
-│   └── README.md                  # Git-tracked baselines
+├── baselines/                     # Per-user baselines: <userId>/<service>.json
+│   └── README.md                  # Baseline docs
 │
 └── README.md                      # This file
 ```
@@ -198,9 +201,9 @@ PerfSight/
 - `GET /api/metrics/overview` - Get system overview (protected)
 
 ### Baselines
-- `GET /api/baselines` - Get all baselines (protected)
-- `GET /api/baselines/:service` - Get baseline for service (protected)
-- `POST /api/baselines/:service` - Update baseline (protected)
+- `GET /api/baselines` - Get current user's baseline services (protected)
+- `GET /api/baselines/:service` - Get current user's baseline for service (protected)
+- `POST /api/baselines/:service` - Update current user's baseline (protected)
 
 ### Performance Metrics
 - `POST /api/perf` - Ingest perf metric (protected)
@@ -308,7 +311,7 @@ curl -X POST http://localhost:5000/api/perf \
 3. **Regression Detection** - Hybrid z-score + baseline comparison
 4. **Report Generation** - Aggregates analysis, baselines, regressions, perf data
 5. **Dashboard Display** - Frontend visualizes data with charts and alerts
-6. **Baseline Management** - Commit baselines to Git for version control
+6. **Baseline Management** - Commit per-user baselines (`baselines/<userId>/<service>.json`) to Git for version control
 
 ## 📝 Environment Variables
 

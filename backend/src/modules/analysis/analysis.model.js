@@ -1,7 +1,14 @@
 import mongoose from 'mongoose';
+import retention from '../../config/retention.config.js';
 
 const analysisSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
+      index: true,
+    },
     service: {
       type: String,
       required: true,
@@ -30,6 +37,11 @@ const analysisSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    expiresAt: {
+      type: Date,
+      required: true,
+      select: false,
+    },
   },
   {
     timestamps: false,
@@ -37,7 +49,14 @@ const analysisSchema = new mongoose.Schema(
   }
 );
 
-analysisSchema.index({ service: 1, windowEnd: -1 });
+analysisSchema.index({ user: 1, service: 1, windowEnd: -1 });
+analysisSchema.index(
+  { expiresAt: 1 },
+  {
+    expireAfterSeconds: 0,
+    name: 'analysis_expiresAt_ttl',
+  }
+);
 
 const Analysis = mongoose.model('Analysis', analysisSchema);
 

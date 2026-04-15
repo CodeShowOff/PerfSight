@@ -4,6 +4,11 @@
 
 PerfSight **automatically discovers services** when you send performance metrics. There's no manual service registration - just start sending data!
 
+> Heads up: different pages use different data sources.
+> - **Dashboard/Records** come from app-level latency metrics sent to `POST /api/metrics`.
+> - **Perf Telemetry** comes from low-level counters sent to `POST /api/perf`.
+> - **Baselines** are **not auto-generated**—you create them via `POST /api/baselines/:service` (they’re stored as JSON files under `backend/baselines/<userId>/`).
+
 ## 📊 What Services Should You Monitor?
 
 Monitor any backend service or API in your system:
@@ -282,6 +287,31 @@ chmod +x populate_metrics.sh
 ./populate_metrics.sh
 ```
 
+### Windows / Node quick seeding (recommended)
+
+This repo includes a single ready-to-run demo seeding script under `Docs/`:
+
+- `Docs/demo-seed.ps1` (PowerShell) or `Docs/demo-seed.js` (Node)
+  - Creates/logs into a demo user
+  - Sends 30 days of sample latency metrics to `POST /api/metrics`
+  - Sends sample perf telemetry to `POST /api/perf`
+  - Sets baselines via `POST /api/baselines/:service`
+
+### 🎓 Professor/demo seeding (no token copying)
+
+If you want a single script that:
+- creates/logs into a demo user,
+- pushes 30 days of sample metrics + perf telemetry,
+- and sets baselines automatically,
+
+use:
+- `Docs/demo-seed.js` (Node)
+- `Docs/demo-seed.ps1` (PowerShell wrapper)
+
+Default demo credentials:
+- Email: `shubham@gmail.com`
+- Password: `Pass123@`
+
 ## 📈 What Happens After Sending Metrics?
 
 1. **Metrics are stored** in MongoDB
@@ -326,6 +356,14 @@ Once services are added, you'll see:
 - ✅ Send at least 5-10 metrics per service
 - ✅ Wait for analysis worker to complete one cycle
 - ✅ Check browser console for errors
+
+### Baselines page is empty?
+- ✅ Expected until you create baseline files (via the baselines API).
+- ✅ After creating baselines, refresh `/baselines`.
+
+### Perf Telemetry shows “No perf data”?
+- ✅ Expected until you send `POST /api/perf` samples.
+- ✅ On Windows, you typically won’t have Linux `perf` counters natively—use the included seed script for demos, or run your instrumented service in Linux/WSL2 and post real counters.
 
 ### Worker errors?
 - ✅ Ensure MongoDB connection is stable

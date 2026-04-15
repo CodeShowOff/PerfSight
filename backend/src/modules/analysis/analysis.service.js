@@ -1,19 +1,22 @@
 import Metric from '../metrics/metrics.model.js';
 import Analysis from './analysis.model.js';
+import retention from '../../config/retention.config.js';
 
 /**
  * Compute a rolling analysis snapshot for a single service within a time window.
  * Uses MongoDB aggregation only — never loads raw documents into memory.
  *
  * @param {Object}  params
+ * @param {string|import('mongoose').Types.ObjectId}  params.userId
  * @param {string}  params.service
  * @param {Date}    params.startTime
  * @param {Date}    params.endTime
  * @returns {Promise<{avgLatency:number, p95Latency:number, requestCount:number}|null>}
  */
-const computeWindowAnalysis = async ({ service, startTime, endTime }) => {
+const computeWindowAnalysis = async ({ userId, service, startTime, endTime }) => {
   const matchStage = {
     $match: {
+      user: userId,
       service,
       timestamp: { $gte: startTime, $lte: endTime },
     },
@@ -92,11 +95,19 @@ const computeWindowAnalysis = async ({ service, startTime, endTime }) => {
 /**
  * Persist a computed analysis snapshot.
  *
- * @param {Object} data - Must include service, windowStart, windowEnd, avgLatency, p95Latency, requestCount.
+ * @param {Object} data - Must include user, service, windowStart, windowEnd, avgLatency, p95Latency, requestCount.
  * @returns {Promise<Object>} The saved document as a plain JS object.
  */
 const saveAnalysisSnapshot = async (data) => {
-  const doc = await Analysis.create(data);
+  const windowEnd = data?.windowEnd ? new Date(data.windowEnd) : new Date();
+  const expiresAt = new Date(
+    windowEnd.getTime() + retention.dataRetentionSeconds * 1000
+  );
+
+  const doc = await Analysis.create({
+    ...data,
+    expiresAt,
+  });
   return doc.toObject();
 };
 

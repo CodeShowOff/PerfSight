@@ -1,6 +1,11 @@
 import dotenv from 'dotenv';
 
-dotenv.config();
+// Prefer local overrides for development without touching production secrets.
+//
+// Order matters: dotenv does not override existing env vars by default, so
+// loading `.env.local` first keeps its values even if `.env` is present.
+dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
 const env = {
   PORT: process.env.PORT || '5000',

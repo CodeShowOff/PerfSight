@@ -1,17 +1,20 @@
 import Analysis from '../analysis/analysis.model.js';
 import Regression from './regression.model.js';
 import { getBaseline } from '../baseline/baseline.service.js';
+import retention from '../../config/retention.config.js';
 
 /**
  * Calculate baseline statistics from historical Analysis snapshots.
  * Fetches last 30 snapshots BEFORE the current window.
  *
+ * @param {string|import('mongoose').Types.ObjectId} userId
  * @param {string} service
  * @param {Date} beforeWindowEnd - Exclude snapshots after this timestamp
  * @returns {Promise<{mean: number, stdDev: number}|null>}
  */
-const calculateBaselineStats = async (service, beforeWindowEnd) => {
+const calculateBaselineStats = async (userId, service, beforeWindowEnd) => {
   const snapshots = await Analysis.find({
+    user: userId,
     service,
     windowEnd: { $lt: beforeWindowEnd },
   })
@@ -40,13 +43,14 @@ const calculateBaselineStats = async (service, beforeWindowEnd) => {
 /**
  * Get baseline comparison from Git-tracked baseline file.
  *
+ * @param {string|import('mongoose').Types.ObjectId} userId
  * @param {string} service
  * @param {Object} latestAnalysis - Must have { avgLatency }
  * @returns {Promise<{baselineAvgLatency: number, baselineDeviation: number}|null>}
  */
-const getBaselineComparison = async (service, latestAnalysis) => {
+const getBaselineComparison = async (userId, service, latestAnalysis) => {
   try {
-    const baseline = await getBaseline(service);
+    const baseline = await getBaseline(userId, service);
 
     if (!baseline || !baseline.avgLatency) {
       return null;
@@ -72,15 +76,13 @@ const getBaselineComparison = async (service, latestAnalysis) => {
  * Detect regression using HYBRID detection: statistical z-score + baseline deviation.
  *
  * @param {Object} params
+ * @param {string|import('mongoose').Types.ObjectId} params.userId
  * @param {string} params.service
  * @param {Object} params.latestAnalysis - Must have { avgLatency, windowEnd }
  * @returns {Promise<Object|null>} Regression object or null if normal
  */
-const detectRegression = async ({ service, latestAnalysis }) => {
-  const baseline = await calculateBaselineStats(
-    service,
-    latestAnalysis.windowEnd
-  );
+const detectRegression = async ({ userId, service, latestAnalysis }) => {
+  const baseline = await calculateBaselineStats(userId, service, latestAnalysis.windowEnd);
 
   if (!baseline) {
     return null;
@@ -105,6 +107,7 @@ const detectRegression = async ({ service, latestAnalysis }) => {
 
   // Get baseline comparison from Git-tracked baseline file
   const baselineComparison = await getBaselineComparison(
+    userId,
     service,
     latestAnalysis
   );
@@ -145,11 +148,22 @@ const detectRegression = async ({ service, latestAnalysis }) => {
 /**
  * Persist a regression event to the database.
  *
+ * @param {string|import('mongoose').Types.ObjectId} userId - Owner user id.
  * @param {Object} data - Regression event object
  * @returns {Promise<Object>} Saved document as plain object
  */
-const saveRegressionEvent = async (data) => {
-  const doc = await Regression.create(data);
+const saveRegressionEvent = async (userId, data) => {
+  const detectedAt = new Date();
+  const expiresAt = new Date(
+    detectedAt.getTime() + retention.dataRetentionSeconds * 1000
+  );
+
+  const doc = await Regression.create({
+    ...data,
+    user: userId,
+    detectedAt,
+    expiresAt,
+  });
   return doc.toObject();
 };
 

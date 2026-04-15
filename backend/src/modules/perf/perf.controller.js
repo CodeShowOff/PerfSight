@@ -7,7 +7,7 @@ import * as perfService from './perf.service.js';
  * @access  Private
  */
 const ingestPerfMetric = asyncHandler(async (req, res) => {
-  const metric = await perfService.createPerfMetric(req.body);
+  const metric = await perfService.createPerfMetric(req.user._id, req.body);
 
   res.status(201).json({
     success: true,
@@ -24,6 +24,7 @@ const fetchPerfTimeseries = asyncHandler(async (req, res) => {
   const { service, startTime, endTime } = req.query;
 
   const data = await perfService.getPerfTimeseries({
+    userId: req.user._id,
     service,
     startTime: new Date(startTime),
     endTime: new Date(endTime),

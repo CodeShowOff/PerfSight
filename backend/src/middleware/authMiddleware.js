@@ -3,26 +3,43 @@ import asyncHandler from 'express-async-handler';
 import User from '../modules/users/users.model.js';
 
 const protect = asyncHandler(async (req, res, next) => {
-  let token;
+  const cookieToken = req.cookies?.jwt;
 
-  token = req.cookies.jwt;
+  const authHeader = req.headers.authorization;
+  const bearerToken =
+    authHeader && authHeader.startsWith('Bearer ')
+      ? authHeader.split(' ')[1]
+      : null;
 
-  if (token) {
+  const tokenCandidates = [cookieToken, bearerToken].filter(Boolean);
+  let lastError;
+
+  for (const candidate of tokenCandidates) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(candidate, process.env.JWT_SECRET);
 
-      req.user = await User.findById(decoded.userId).select('-password');
+      const user = await User.findById(decoded.userId).select('-password');
+      if (!user) {
+        res.status(401);
+        throw new Error('Not authorized, user not found');
+      }
 
+      req.user = user;
       next();
+      return;
     } catch (error) {
-      console.error(error);
-      res.status(401);
-      throw new Error('Not authorized, token failed');
+      lastError = error;
     }
-  } else {
-    res.status(401);
-    throw new Error('Not authorized, no token');
   }
+
+  if (lastError) {
+    console.error(lastError);
+    res.status(401);
+    throw new Error('Not authorized, token failed');
+  }
+
+  res.status(401);
+  throw new Error('Not authorized, no token');
 });
 
 export { protect };

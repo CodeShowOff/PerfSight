@@ -1,7 +1,14 @@
 import mongoose from 'mongoose';
+import retention from '../../config/retention.config.js';
 
 const metricsSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
+      index: true,
+    },
     service: {
       type: String,
       required: true,
@@ -27,7 +34,11 @@ const metricsSchema = new mongoose.Schema(
     timestamp: {
       type: Date,
       default: Date.now,
-      index: true,
+    },
+    expiresAt: {
+      type: Date,
+      required: true,
+      select: false,
     },
   },
   {
@@ -36,8 +47,15 @@ const metricsSchema = new mongoose.Schema(
   }
 );
 
-metricsSchema.index({ service: 1, timestamp: -1 });
-metricsSchema.index({ endpoint: 1 });
+metricsSchema.index({ user: 1, service: 1, timestamp: -1 });
+metricsSchema.index({ user: 1, endpoint: 1 });
+metricsSchema.index(
+  { expiresAt: 1 },
+  {
+    expireAfterSeconds: 0,
+    name: 'metrics_expiresAt_ttl',
+  }
+);
 
 const Metric = mongoose.model('Metric', metricsSchema);
 

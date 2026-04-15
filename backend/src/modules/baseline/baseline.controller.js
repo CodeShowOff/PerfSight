@@ -9,7 +9,7 @@ import * as baselineService from './baseline.service.js';
 const fetchBaseline = asyncHandler(async (req, res) => {
   const { service } = req.params;
 
-  const baseline = await baselineService.getBaseline(service);
+  const baseline = await baselineService.getBaseline(req.user._id, service);
 
   if (!baseline) {
     res.status(404);
@@ -31,7 +31,7 @@ const updateBaseline = asyncHandler(async (req, res) => {
   const { service } = req.params;
   const { avgLatency, p95Latency } = req.body;
 
-  const baseline = await baselineService.saveBaseline(service, {
+  const baseline = await baselineService.saveBaseline(req.user._id, service, {
     avgLatency,
     p95Latency,
   });
@@ -48,7 +48,7 @@ const updateBaseline = asyncHandler(async (req, res) => {
  * @access  Private
  */
 const fetchAllBaselines = asyncHandler(async (req, res) => {
-  const services = await baselineService.listBaselines();
+  const services = await baselineService.listBaselines(req.user._id);
 
   res.status(200).json({
     success: true,

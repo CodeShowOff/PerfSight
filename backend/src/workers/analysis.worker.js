@@ -35,19 +35,36 @@ let isShuttingDown = false;
  */
 const runAnalysisCycle = async () => {
   try {
-    const services = await Metric.distinct('service');
+    const pairs = await Metric.aggregate([
+      { $match: { user: { $exists: true, $ne: null } } },
+      {
+        $group: {
+          _id: {
+            user: '$user',
+            service: '$service',
+          },
+        },
+      },
+    ]);
 
-    if (services.length === 0) {
-      console.log('[Worker] No services found — skipping cycle.');
+    if (pairs.length === 0) {
+      console.log('[Worker] No user/service pairs found — skipping cycle.');
       return;
     }
 
     const endTime = new Date();
     const startTime = new Date(endTime.getTime() - INTERVAL_MS);
 
-    for (const service of services) {
+    for (const pair of pairs) {
+      const userId = pair?._id?.user;
+      const service = pair?._id?.service;
+
+      if (!userId || !service) {
+        continue;
+      }
+
       try {
-        const result = await computeWindowAnalysis({ service, startTime, endTime });
+        const result = await computeWindowAnalysis({ userId, service, startTime, endTime });
 
         if (!result) {
           console.log(`[Worker] No metrics for "${service}" in window — skipped.`);
@@ -55,6 +72,7 @@ const runAnalysisCycle = async () => {
         }
 
         const snapshot = await saveAnalysisSnapshot({
+          user: userId,
           service,
           windowStart: startTime,
           windowEnd: endTime,
@@ -70,12 +88,13 @@ const runAnalysisCycle = async () => {
         // Regression detection
         try {
           const regression = await detectRegression({
+            userId,
             service,
             latestAnalysis: snapshot,
           });
 
           if (regression) {
-            await saveRegressionEvent(regression);
+            await saveRegressionEvent(userId, regression);
 
             const baselineInfo = regression.baselineAvgLatency
               ? ` | baseline=${regression.baselineAvgLatency.toFixed(2)}ms (${(regression.baselineDeviation * 100).toFixed(1)}% deviation)`
@@ -94,10 +113,10 @@ const runAnalysisCycle = async () => {
 
         // Report generation
         try {
-          const report = await generateServiceReport(service);
+          const report = await generateServiceReport(userId, service);
 
           if (report) {
-            await saveReport(report);
+            await saveReport(userId, report);
             console.log(`[Worker] Report generated for "${service}"`);
           }
         } catch (reportErr) {

@@ -1,6 +1,6 @@
+import env from './config/env.js';
 import app from './app.js';
 import connectDB, { disconnectDB } from './config/db.js';
-import env from './config/env.js';
 
 const port = Number(process.env.PORT || env.PORT || 5000);
 let server;

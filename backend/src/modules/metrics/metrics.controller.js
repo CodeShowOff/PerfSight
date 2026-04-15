@@ -7,7 +7,7 @@ import * as metricsService from './metrics.service.js';
  * @access  Private
  */
 const ingestMetric = asyncHandler(async (req, res) => {
-  const metric = await metricsService.createMetric(req.body);
+  const metric = await metricsService.createMetric(req.user._id, req.body);
 
   res.status(201).json({
     success: true,
@@ -29,7 +29,11 @@ const fetchRecentMetrics = asyncHandler(async (req, res) => {
 
   const parsedLimit = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 500);
 
-  const metrics = await metricsService.getRecentMetrics(filter, parsedLimit);
+  const metrics = await metricsService.getRecentMetrics(
+    req.user._id,
+    filter,
+    parsedLimit
+  );
 
   res.status(200).json({
     success: true,
@@ -50,6 +54,7 @@ const fetchLatencyTimeseries = asyncHandler(async (req, res) => {
   const { service, startTime, endTime, interval } = req.query;
 
   const data = await metricsService.getLatencyTimeseries({
+    userId: req.user._id,
     service,
     startTime: new Date(startTime),
     endTime: new Date(endTime),
@@ -68,6 +73,7 @@ const fetchEndpointSummary = asyncHandler(async (req, res) => {
   const { service, startTime, endTime } = req.query;
 
   const data = await metricsService.getEndpointPerformanceSummary({
+    userId: req.user._id,
     service,
     startTime: new Date(startTime),
     endTime: new Date(endTime),
@@ -85,6 +91,7 @@ const fetchSystemOverview = asyncHandler(async (req, res) => {
   const { service, startTime, endTime } = req.query;
 
   const data = await metricsService.getSystemOverview({
+    userId: req.user._id,
     service,
     startTime: new Date(startTime),
     endTime: new Date(endTime),

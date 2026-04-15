@@ -12,6 +12,7 @@ const useReports = (service) => {
   const fetchData = useCallback(async () => {
     if (!service) {
       abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
       inFlightKeyRef.current = null;
       inFlightRequestRef.current = null;
       setData([]);
@@ -22,7 +23,16 @@ const useReports = (service) => {
 
     const requestKey = service;
     if (inFlightRequestRef.current && inFlightKeyRef.current === requestKey) {
-      return inFlightRequestRef.current;
+      const hasActiveController = Boolean(
+        abortControllerRef.current && !abortControllerRef.current.signal.aborted
+      );
+
+      if (hasActiveController) {
+        return inFlightRequestRef.current;
+      }
+
+      inFlightKeyRef.current = null;
+      inFlightRequestRef.current = null;
     }
 
     abortControllerRef.current?.abort();
@@ -60,6 +70,9 @@ const useReports = (service) => {
 
     return () => {
       abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
+      inFlightKeyRef.current = null;
+      inFlightRequestRef.current = null;
     };
   }, [fetchData]);
 

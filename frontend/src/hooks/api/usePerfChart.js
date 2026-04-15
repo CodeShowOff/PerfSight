@@ -12,6 +12,7 @@ const usePerfChart = (service, range, startTime, endTime) => {
   const fetchData = useCallback(async () => {
     if (!service || !range || !startTime || !endTime) {
       abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
       inFlightKeyRef.current = null;
       inFlightRequestRef.current = null;
       setData([]);
@@ -22,7 +23,16 @@ const usePerfChart = (service, range, startTime, endTime) => {
 
     const requestKey = `${service}|${range}|${startTime}|${endTime}`;
     if (inFlightRequestRef.current && inFlightKeyRef.current === requestKey) {
-      return inFlightRequestRef.current;
+      const hasActiveController = Boolean(
+        abortControllerRef.current && !abortControllerRef.current.signal.aborted
+      );
+
+      if (hasActiveController) {
+        return inFlightRequestRef.current;
+      }
+
+      inFlightKeyRef.current = null;
+      inFlightRequestRef.current = null;
     }
 
     abortControllerRef.current?.abort();
@@ -65,6 +75,9 @@ const usePerfChart = (service, range, startTime, endTime) => {
 
     return () => {
       abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
+      inFlightKeyRef.current = null;
+      inFlightRequestRef.current = null;
     };
   }, [fetchData]);
 

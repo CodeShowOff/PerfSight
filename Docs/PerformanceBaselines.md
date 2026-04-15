@@ -1,21 +1,15 @@
 # Performance Baselines
 
-This directory stores Git-tracked baseline performance metrics for each service.
+PerfSight stores baseline performance metrics per user and per service in MongoDB.
 
-## File Format
+## Data Format
 
-Each service has its own JSON file: `{service}.json`
+Baselines are stored per user + service with:
 
-### Structure
-
-```json
-{
-  "service": "auth-service",
-  "avgLatency": 45.23,
-  "p95Latency": 120.50,
-  "updatedAt": "2026-02-18T10:30:00.000Z"
-}
-```
+- `service` (string)
+- `avgLatency` (number)
+- `p95Latency` (number)
+- `updatedAt` (ISO date)
 
 ## API Endpoints
 
@@ -24,10 +18,14 @@ Each service has its own JSON file: `{service}.json`
 GET /api/baselines
 ```
 
+Returns baseline services for the authenticated user only.
+
 ### Get baseline for a service
 ```
 GET /api/baselines/:service
 ```
+
+Fetches the authenticated user's baseline for that service.
 
 ### Create/Update baseline
 ```
@@ -38,9 +36,10 @@ POST /api/baselines/:service
 }
 ```
 
+Writes to the authenticated user's baseline file path.
+
 All endpoints require authentication.
 
-## Git Tracking
+## Storage
 
-These files are version-controlled to track performance expectations over time.
-Commit baseline changes when performance targets are updated.
+Baselines are stored in MongoDB so the Baselines page can render directly from the database.

@@ -10,7 +10,15 @@ const useSystemHealth = () => {
 
   const fetchData = useCallback(async () => {
     if (inFlightRequestRef.current) {
-      return inFlightRequestRef.current;
+      const hasActiveController = Boolean(
+        abortControllerRef.current && !abortControllerRef.current.signal.aborted
+      );
+
+      if (hasActiveController) {
+        return inFlightRequestRef.current;
+      }
+
+      inFlightRequestRef.current = null;
     }
 
     abortControllerRef.current?.abort();
@@ -46,6 +54,8 @@ const useSystemHealth = () => {
 
     return () => {
       abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
+      inFlightRequestRef.current = null;
     };
   }, [fetchData]);
 

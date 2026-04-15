@@ -1,23 +1,38 @@
 import Metric from './metrics.model.js';
+import retention from '../../config/retention.config.js';
 
 /**
  * Persist a single metric document.
+ * @param {string|import('mongoose').Types.ObjectId} userId - Owner user id.
  * @param {Object} data - Validated metric payload.
  * @returns {Promise<Object>} Created metric document.
  */
-const createMetric = async (data) => {
-  const metric = await Metric.create(data);
+const createMetric = async (userId, data) => {
+  const timestamp = data?.timestamp ? new Date(data.timestamp) : new Date();
+  const expiresAt = new Date(
+    timestamp.getTime() + retention.dataRetentionSeconds * 1000
+  );
+
+  const metric = await Metric.create({
+    ...data,
+    timestamp,
+    expiresAt,
+    user: userId,
+  });
   return metric.toObject();
 };
 
 /**
  * Retrieve recent metrics with optional filtering.
- * @param {Object} filter - Mongoose query filter.
+ * @param {string|import('mongoose').Types.ObjectId} userId - Owner user id.
+ * @param {Object} filter - Mongoose query filter (user is enforced server-side).
  * @param {number} limit - Max documents to return (default 50).
  * @returns {Promise<Object[]>} Array of metric documents.
  */
-const getRecentMetrics = async (filter = {}, limit = 50) => {
-  const metrics = await Metric.find(filter)
+const getRecentMetrics = async (userId, filter = {}, limit = 50) => {
+  const enforcedFilter = { ...filter, user: userId };
+
+  const metrics = await Metric.find(enforcedFilter)
     .sort({ timestamp: -1 })
     .limit(limit)
     .lean();
@@ -47,12 +62,13 @@ const INTERVAL_MAP = {
  * @param {string} [params.interval='minute']
  * @returns {Promise<Array<{time: Date, avgLatency: number}>>}
  */
-const getLatencyTimeseries = async ({ service, startTime, endTime, interval = 'minute' }) => {
+const getLatencyTimeseries = async ({ userId, service, startTime, endTime, interval = 'minute' }) => {
   const { unit, binSize } = INTERVAL_MAP[interval] || INTERVAL_MAP.minute;
 
   const pipeline = [
     {
       $match: {
+        user: userId,
         service,
         timestamp: { $gte: startTime, $lte: endTime },
       },
@@ -90,10 +106,11 @@ const getLatencyTimeseries = async ({ service, startTime, endTime, interval = 'm
  * @param {Date}   params.endTime
  * @returns {Promise<Array<{endpoint: string, avgLatency: number, requestCount: number, errorRate: number}>>}
  */
-const getEndpointPerformanceSummary = async ({ service, startTime, endTime }) => {
+const getEndpointPerformanceSummary = async ({ userId, service, startTime, endTime }) => {
   const pipeline = [
     {
       $match: {
+        user: userId,
         service,
         timestamp: { $gte: startTime, $lte: endTime },
       },
@@ -137,9 +154,10 @@ const getEndpointPerformanceSummary = async ({ service, startTime, endTime }) =>
  * @param {Date}   params.endTime
  * @returns {Promise<{avgLatency: number, p95Latency: number, totalRequests: number}>}
  */
-const getSystemOverview = async ({ service, startTime, endTime }) => {
+const getSystemOverview = async ({ userId, service, startTime, endTime }) => {
   const matchStage = {
     $match: {
+      user: userId,
       service,
       timestamp: { $gte: startTime, $lte: endTime },
     },
