@@ -1,6 +1,13 @@
 import cors from 'cors';
 import env from '../config/env.js';
 
+const devAllowedOrigins = new Set([
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+]);
+
 const corsMiddleware = cors({
   origin(origin, callback) {
     if (!origin) {
@@ -13,7 +20,7 @@ const corsMiddleware = cors({
       return;
     }
 
-    if (env.NODE_ENV !== 'production' && origin === 'http://localhost:5173') {
+    if (devAllowedOrigins.has(origin)) {
       callback(null, true);
       return;
     }
