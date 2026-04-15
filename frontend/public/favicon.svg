@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>PerfSight</title>
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .s { stroke: #ffffff; }
+      .f { fill: #ffffff; }
+    }
+    @media (prefers-color-scheme: light) {
+      .s { stroke: #111827; }
+      .f { fill: #111827; }
+    }
+  </style>
+
+  <rect x="8" y="8" width="48" height="48" rx="12" fill="none" class="s" stroke-width="4" />
+
+  <path
+    d="M20 40 L28 32 L34 36 L44 24"
+    fill="none"
+    class="s"
+    stroke-width="4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <circle cx="44" cy="24" r="3" class="f" />
+</svg>

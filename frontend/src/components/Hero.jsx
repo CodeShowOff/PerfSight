@@ -14,7 +14,7 @@ const Hero = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <span className="text-2xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-100 transition-colors duration-300">
-              PerfSight.
+              PerfSight
             </span>
           </Link>
 
