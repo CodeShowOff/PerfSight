@@ -302,7 +302,7 @@ const Hero = () => {
       <footer className="px-6 lg:px-12 py-12 bg-white dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-xl font-serif font-bold text-stone-900 dark:text-stone-100 transition-colors duration-300">
-            PerfSight.
+            PerfSight
           </div>
           <p className="text-stone-400 dark:text-stone-500 text-xs tracking-wider uppercase transition-colors duration-300">
             © {new Date().getFullYear()} PerfSight. Designed for permanence.

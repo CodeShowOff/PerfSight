@@ -31,7 +31,7 @@ const Header = () => {
       {/* Logo and Brand */}
       <button onClick={() => navigate('/')} className="flex items-center gap-3 group cursor-pointer mt-1">
         <h1 className="text-2xl font-serif font-bold text-stone-900 dark:text-stone-100 transition-colors duration-300">
-          PerfSight.
+          PerfSight
         </h1>
       </button>
 
