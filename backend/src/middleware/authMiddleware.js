@@ -1,3 +1,4 @@
+// Authorisation Middleware
 import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
 import User from '../modules/users/users.model.js';
