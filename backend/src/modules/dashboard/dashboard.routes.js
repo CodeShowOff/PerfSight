@@ -1,3 +1,5 @@
+// Dashboard's route file
+
 import express from 'express';
 import { protect } from '../../middleware/authMiddleware.js';
 import {
